@@ -1,6 +1,3 @@
-
-
-
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
  xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
@@ -43,7 +40,9 @@
    </div>
 
    <div class="sd">
+   
     <div class="calendar_row sd">
+    
      <div class="calendar_box sd">
       <p class="calendar_title_text sd">SUN</p>
      </div>
@@ -66,16 +65,22 @@
       <p class="calendar_title_text sd">SAT</p>
      </div>
     </div>
+    
     <div class="calendar_row sd" th:each="week : ${matrix}">
+    
      <div class="calendar_box  sd" th:each="day : ${week}">
+     
       <div>
        <a th:href="@{/main/create/{date}(date=${day})}">[[${day.dayOfMonth}]]</a>
       </div>
-      <div th:each="t : ${tasks.get(day)}">
+      
+<!--       <div th:each="t : ${tasks.get(day)}">
        <a th:if="${t}" th:href="@{/main/edit/{id}(id=${t.id})}"> <span
         th:if="${t.done}">✅</span><span th:text="${t.title}"></span></a>
-      </div>
+      </div> -->
+      
      </div>
+     
     </div>
    </div>
   </div>
