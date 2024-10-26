@@ -1,16 +1,12 @@
 package com.dmm.task.form;
 
-import javax.validation.constraints.Size;
+import java.time.LocalDate;
 
 import lombok.Data;
 
 @Data
 public class TaskForm {
-	// titleへのバリデーション設定を追加
-		@Size(min = 1, max = 200)
-		private String title;
-		// textへのバリデーション設定を追加
-		@Size(min = 1, max = 200)
-		private String text;
-	
+	private String title;
+	private String text;
+	private LocalDate date;
 }
