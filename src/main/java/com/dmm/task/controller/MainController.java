@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
@@ -92,12 +93,14 @@ public class MainController {
 	// タスク登録用
 	@PostMapping("main/create")
 	public String createTasks(TaskForm taskForm, BindingResult bindingResult,
-			AccountUserDetails user, Model model) {
+			@AuthenticationPrincipal AccountUserDetails user, Model model) {
 		Tasks tasks = new Tasks();
 		tasks.setName(user.getName());
 		tasks.setTitle(taskForm.getTitle());
 		tasks.setText(taskForm.getText());
+		System.out.println("### [DEBUG] date=" + taskForm.getDate());
 		tasks.setDate(taskForm.getDate());
+		
 		repo.save(tasks);
 		
 		return "redirect:/main";
