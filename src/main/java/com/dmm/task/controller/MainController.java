@@ -98,11 +98,9 @@ public class MainController {
 		tasks.setName(user.getName());
 		tasks.setTitle(taskForm.getTitle());
 		tasks.setText(taskForm.getText());
-		System.out.println("### [DEBUG] date=" + taskForm.getDate());
 		tasks.setDate(taskForm.getDate());
 		
 		repo.save(tasks);
-		
 		return "redirect:/main";
 	}
 
