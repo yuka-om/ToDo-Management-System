@@ -101,6 +101,8 @@ public class MainController {
 		tasks.setDate(taskForm.getDate());
 		
 		repo.save(tasks);
+		model.addAttribute("tasks.get(day)", tasks);
+
 		return "redirect:/main";
 	}
 
