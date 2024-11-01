@@ -24,9 +24,12 @@ import com.dmm.task.service.AccountUserDetails;
 
 @Controller
 public class MainController {
+	
+	@Autowired
+	private TaskRepository repo;
 
 	@GetMapping("/main")
-	public String main(Model model) {
+	public String main(Model model,@AuthenticationPrincipal AccountUserDetails user) {
 
 		//1. 2次元表になるので、ListのListを用意する	 
 		List<List<LocalDate>> month = new ArrayList<>();
@@ -78,11 +81,18 @@ public class MainController {
 		MultiValueMap<LocalDate, Tasks> tasks = new LinkedMultiValueMap<LocalDate, Tasks>();
 		model.addAttribute("matrix", month);
 		model.addAttribute("tasks", tasks);
+		
+		if (user.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+		    // adminのとき
+			repo.findAllByDateBetween(null, null);
+		} else {
+			repo.findByDateBetween(null, null, null);
+		}
+		
 		return "main";
 	}
 	
-	@Autowired
-	private TaskRepository repo;
+
 
 	// タスク登録画面の表示用
 	@GetMapping("/main/create/{date}")
