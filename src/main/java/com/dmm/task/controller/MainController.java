@@ -24,19 +24,22 @@ import com.dmm.task.service.AccountUserDetails;
 
 @Controller
 public class MainController {
-	
+
 	@Autowired
 	private TaskRepository repo;
 
 	@GetMapping("/main")
 	public String main(Model model,@AuthenticationPrincipal AccountUserDetails user) {
 
+
+
 		//1. 2次元表になるので、ListのListを用意する	 
 		List<List<LocalDate>> month = new ArrayList<>();
 		//2. 1週間分のLocalDateを格納するListを用意する		
 		List<LocalDate> week = new ArrayList<>();
 
-		LocalDate day;
+		LocalDate day, start;
+
 		day = LocalDate.now();  // 現在日時を取得
 
 		//3. その月の1日のLocalDateを取得する
@@ -47,6 +50,7 @@ public class MainController {
 
 		//上で取得したLocalDateに曜日の値（DayOfWeek#getValue)をマイナスして前月分のLocalDateを求める
 		day = day.minusDays(w.getValue());
+		start = day;
 		//5. 1日ずつ増やしてLocalDateを求めていき、
 		for(int i = 0; i < 7; i++){
 			//2．で作成したListへ格納していき、 
@@ -77,21 +81,21 @@ public class MainController {
 		}
 		}
 		
+		List<Tasks> list;
 		// ★日付とタスクを紐付けるコレクション
 		MultiValueMap<LocalDate, Tasks> tasks = new LinkedMultiValueMap<LocalDate, Tasks>();
-		model.addAttribute("matrix", month);
-		model.addAttribute("tasks", tasks);
 		
 		if (user.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
-		    // adminのとき
-			repo.findAllByDateBetween(null, null);
+			list = repo.findAllByDateBetween(start, day);
 		} else {
-			repo.findByDateBetween(null, null, null);
+			list = repo.findByDateBetween(start, day, user.getName());
 		}
 		
+		model.addAttribute("matrix", month);
+		model.addAttribute("tasks", tasks);
 		return "main";
 	}
-	
+
 
 
 	// タスク登録画面の表示用
@@ -109,7 +113,7 @@ public class MainController {
 		tasks.setTitle(taskForm.getTitle());
 		tasks.setText(taskForm.getText());
 		tasks.setDate(taskForm.getDate());
-		
+
 		repo.save(tasks);
 		model.addAttribute("tasks.get(day)", tasks);
 
