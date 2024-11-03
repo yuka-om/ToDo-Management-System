@@ -29,25 +29,24 @@ public class MainController{
 	private TaskRepository repo;
 
 	@GetMapping("/main")
-	public String main(Model model,@AuthenticationPrincipal AccountUserDetails user) {
-
-
-
+	public String main(Model model,@AuthenticationPrincipal AccountUserDetails user,
+			@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
 		//1. 2次元表になるので、ListのListを用意する	 
 		List<List<LocalDate>> month = new ArrayList<>();
 		//2. 1週間分のLocalDateを格納するListを用意する		
 		List<LocalDate> week = new ArrayList<>();
-
 		LocalDate day, start;
-
+		
 		day = LocalDate.now();  // 現在日時を取得
-
+		
+		model.addAttribute("prev", day.minusMonths(1));
+		model.addAttribute("month", day.getMonth());
+		model.addAttribute("next", day.plusMonths(1));
+		
 		//3. その月の1日のLocalDateを取得する
 		day = LocalDate.of(day.getYear(), day.getMonthValue(), 1); // 現在日時からその月の1日を取得
-
 		//4.曜日を表すDayOfWeekを取得
 		DayOfWeek w = day.getDayOfWeek();
-
 		//上で取得したLocalDateに曜日の値（DayOfWeek#getValue)をマイナスして前月分のLocalDateを求める
 		day = day.minusDays(w.getValue());
 		start = day;
@@ -80,7 +79,7 @@ public class MainController{
 			week = new ArrayList<>();
 		}
 		}
-		
+		model.addAttribute("matrix", month);
 		List<Tasks> list;
 		// ★日付とタスクを紐付けるコレクション
 		MultiValueMap<LocalDate, Tasks> tasks = new LinkedMultiValueMap<LocalDate, Tasks>();
@@ -93,13 +92,10 @@ public class MainController{
 		for(Tasks task : list) {
 		    tasks.add(task.getDate(), task);
 		}
-		
-		model.addAttribute("matrix", month);
 		model.addAttribute("tasks", tasks);
+		
 		return "main";
 	}
-
-
 
 	// タスク登録画面の表示用
 	@GetMapping("/main/create/{date}")
@@ -142,13 +138,17 @@ public class MainController{
 		task.setText(taskForm.getText());
 		task.setDate(taskForm.getDate());
 		task.setDone(taskForm.isDone());
-		
 		repo.save(task);
-		
 		return "redirect:/main";
 	}
 	
-	
+	// ★タスク削除用
+	  @PostMapping("/main/delete/{id}")
+	  public String deletePost(Model model, @PathVariable Integer id) {
+		  Tasks task = repo.getById(id);
+		  repo.delete(task);
+		  return "redirect:/main";
+	  }
 }
 
 
