@@ -10,6 +10,7 @@ import lombok.Data;
 public class TaskForm {
 	private String title;
 	private String text;
+	private boolean done;
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private LocalDate date;
 }

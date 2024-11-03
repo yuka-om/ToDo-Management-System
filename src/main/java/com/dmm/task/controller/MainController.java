@@ -23,7 +23,7 @@ import com.dmm.task.form.TaskForm;
 import com.dmm.task.service.AccountUserDetails;
 
 @Controller
-public class MainController {
+public class MainController{
 
 	@Autowired
 	private TaskRepository repo;
@@ -90,6 +90,9 @@ public class MainController {
 		} else {
 			list = repo.findByDateBetween(start, day, user.getName());
 		}
+		for(Tasks task : list) {
+		    tasks.add(task.getDate(), task);
+		}
 		
 		model.addAttribute("matrix", month);
 		model.addAttribute("tasks", tasks);
@@ -108,22 +111,45 @@ public class MainController {
 	@PostMapping("main/create")
 	public String createTasks(TaskForm taskForm, BindingResult bindingResult,
 			@AuthenticationPrincipal AccountUserDetails user, Model model) {
-		Tasks tasks = new Tasks();
-		tasks.setName(user.getName());
-		tasks.setTitle(taskForm.getTitle());
-		tasks.setText(taskForm.getText());
-		tasks.setDate(taskForm.getDate());
+		Tasks task = new Tasks();
+		task.setName(user.getName());
+		task.setTitle(taskForm.getTitle());
+		task.setText(taskForm.getText());
+		task.setDate(taskForm.getDate());
 
-		repo.save(tasks);
-		model.addAttribute("tasks.get(day)", tasks);
+		repo.save(task);
+		model.addAttribute("tasks.get(day)", task);
 
 		return "redirect:/main";
 	}
 
-	// タスク編集用
+	// タスク編集画面の表示用
 	@GetMapping("main/edit/{id}")
-	public String edit(Model model) {
-		return "edit";
+	public String edit(Model model, @PathVariable Integer id) {
+	    Tasks task = repo.getById(id);
+	    model.addAttribute("task", task);
+	    return "edit";
 	}
+	
+	// タスク編集登録用
+	@PostMapping("/main/edit/{id}")
+	public String editTasks(@PathVariable Integer id,TaskForm taskForm, BindingResult bindingResult,
+			@AuthenticationPrincipal AccountUserDetails user) {
+		Tasks task = new Tasks();
+	    task.setId(id);
+	    task.setName(user.getName());
+		task.setTitle(taskForm.getTitle());
+		task.setText(taskForm.getText());
+		task.setDate(taskForm.getDate());
+		task.setDone(taskForm.isDone());
+		
+		repo.save(task);
+		
+		return "redirect:/main";
+	}
+	
+	
 }
+
+
 
