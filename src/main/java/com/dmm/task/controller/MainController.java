@@ -2,6 +2,7 @@ package com.dmm.task.controller;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,12 +38,19 @@ public class MainController{
 		List<LocalDate> week = new ArrayList<>();
 		LocalDate day, start;
 		
-		day = LocalDate.now();  // 現在日時を取得
+		 // ★今月 or 前月 or 翌月を判定
+	    if (date == null) {  // 今月と判断
+	        // その月の1日を取得する
+	        day = LocalDate.now();  // 現在日時を取得
+	        day = LocalDate.of(day.getYear(), day.getMonthValue(), 1);  // 現在日時からその月の1日を取得
+	    } else {  // 前月 or 翌月と判断
+	        day = date;  // 引数で受け取った日付をそのまま使う
+	    }
 		
 		model.addAttribute("prev", day.minusMonths(1));
-		model.addAttribute("month", day.getMonth());
+		model.addAttribute("month", day.format(DateTimeFormatter.ofPattern("yyyy年MM月")));
 		model.addAttribute("next", day.plusMonths(1));
-		
+
 		//3. その月の1日のLocalDateを取得する
 		day = LocalDate.of(day.getYear(), day.getMonthValue(), 1); // 現在日時からその月の1日を取得
 		//4.曜日を表すDayOfWeekを取得
@@ -79,7 +87,7 @@ public class MainController{
 			week = new ArrayList<>();
 		}
 		}
-		model.addAttribute("matrix", month);
+
 		List<Tasks> list;
 		// ★日付とタスクを紐付けるコレクション
 		MultiValueMap<LocalDate, Tasks> tasks = new LinkedMultiValueMap<LocalDate, Tasks>();
@@ -92,6 +100,8 @@ public class MainController{
 		for(Tasks task : list) {
 		    tasks.add(task.getDate(), task);
 		}
+		
+		model.addAttribute("matrix", month);
 		model.addAttribute("tasks", tasks);
 		
 		return "main";
@@ -112,7 +122,6 @@ public class MainController{
 		task.setTitle(taskForm.getTitle());
 		task.setText(taskForm.getText());
 		task.setDate(taskForm.getDate());
-
 		repo.save(task);
 		model.addAttribute("tasks.get(day)", task);
 

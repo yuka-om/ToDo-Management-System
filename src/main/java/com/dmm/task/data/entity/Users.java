@@ -9,10 +9,10 @@ import lombok.ToString;
 @Entity
 @Data
 @ToString(exclude = "password") // 自動生成されるtoStringにpasswordを出力しない
-	public class Users {
-		@Id
-		public String userName;
-		public String password;
-		public String name;
-		public String roleName;
-	}
+public class Users {
+	@Id
+	public String userName;
+	public String password;
+	public String name;
+	public String roleName;
+}
