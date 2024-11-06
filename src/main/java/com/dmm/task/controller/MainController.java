@@ -42,7 +42,6 @@ public class MainController{
 		if (date == null) {  // 今月と判断
 			// その月の1日を取得する
 			day = LocalDate.now();  // 現在日時を取得
-			day = LocalDate.of(day.getYear(), day.getMonthValue(), 1);  // 現在日時からその月の1日を取得
 		} else {  // 前月 or 翌月と判断
 			day = date;  // 引数で受け取った日付をそのまま使う
 		}
@@ -53,35 +52,42 @@ public class MainController{
 
 		//3. その月の1日のLocalDateを取得する
 		day = LocalDate.of(day.getYear(), day.getMonthValue(), 1); // 現在日時からその月の1日を取得
+		int lastDay = day.lengthOfMonth();
 		//4.曜日を表すDayOfWeekを取得
 		DayOfWeek w = day.getDayOfWeek();
+		start = day;
+
 		//上で取得したLocalDateに曜日の値（DayOfWeek#getValue)をマイナスして前月分のLocalDateを求める
 		if (!(w.getValue() == 7)) {
 			day = day.minusDays(w.getValue());
+			start = day;
+			//5. 1日ずつ増やしてLocalDateを求めていき、
+			for(int i = 0; i < 7; i++){
+				//2．で作成したListへ格納していき、 
+				week.add(day);
+				day = day.plusDays(1);
+			}
+			//1週間分詰めたら1．のリストへ格納する
+			month.add(week);
+			week = new ArrayList<>();
 		}
-		start = day;
-		//5. 1日ずつ増やしてLocalDateを求めていき、
-		for(int i = 0; i < 7; i++){
-			//2．で作成したListへ格納していき、 
-			week.add(day);
-			day = day.plusDays(1);
-		}
-		//1週間分詰めたら1．のリストへ格納する
-		month.add(week);
-		week = new ArrayList<>();
-
 
 		//6. 2週目以降は単純に1日ずつ日を増やしながらLocalDateを求めてListへ格納していき、
 		//土曜日になったら1．のリストへ格納して新しいListを生成する（月末を求めるにはLocalDate#lengthOfMonth()を使う）
 
-		for (int j = 0; j < day.lengthOfMonth()/7; j++ ) {
+		int left = lastDay-(7 - w.getValue()); // 2週目の最初～月末までの日数 = left
+		int lines = left / 7;
+		if (!(left %7 ==0)) { // leftが7の倍数でなかったら
+			lines++;
+		}
+		for(int j = 0; j < lines ; j++) {  
 			for(int i = 0; i < 7; i++){
 				week.add(day);
 				day = day.plusDays(1);
+				System.out.println("#####" + day);
 			}
 			month.add(week);
 			week = new ArrayList<>();
-
 		}
 
 		List<Tasks> list;
