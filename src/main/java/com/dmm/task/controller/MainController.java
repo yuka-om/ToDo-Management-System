@@ -37,16 +37,16 @@ public class MainController{
 		//2. 1週間分のLocalDateを格納するListを用意する		
 		List<LocalDate> week = new ArrayList<>();
 		LocalDate day, start;
-		
-		 // ★今月 or 前月 or 翌月を判定
-	    if (date == null) {  // 今月と判断
-	        // その月の1日を取得する
-	        day = LocalDate.now();  // 現在日時を取得
-	        day = LocalDate.of(day.getYear(), day.getMonthValue(), 1);  // 現在日時からその月の1日を取得
-	    } else {  // 前月 or 翌月と判断
-	        day = date;  // 引数で受け取った日付をそのまま使う
-	    }
-		
+
+		// ★今月 or 前月 or 翌月を判定
+		if (date == null) {  // 今月と判断
+			// その月の1日を取得する
+			day = LocalDate.now();  // 現在日時を取得
+			day = LocalDate.of(day.getYear(), day.getMonthValue(), 1);  // 現在日時からその月の1日を取得
+		} else {  // 前月 or 翌月と判断
+			day = date;  // 引数で受け取った日付をそのまま使う
+		}
+
 		model.addAttribute("prev", day.minusMonths(1));
 		model.addAttribute("month", day.format(DateTimeFormatter.ofPattern("yyyy年MM月")));
 		model.addAttribute("next", day.plusMonths(1));
@@ -59,47 +59,47 @@ public class MainController{
 		if (!(w.getValue() == 7)) {
 			day = day.minusDays(w.getValue());
 		}
-			start = day;
+		start = day;
 		//5. 1日ずつ増やしてLocalDateを求めていき、
-			for(int i = 0; i < 7; i++){
+		for(int i = 0; i < 7; i++){
 			//2．で作成したListへ格納していき、 
+			week.add(day);
+			day = day.plusDays(1);
+		}
+		//1週間分詰めたら1．のリストへ格納する
+		month.add(week);
+		week = new ArrayList<>();
+
+
+		//6. 2週目以降は単純に1日ずつ日を増やしながらLocalDateを求めてListへ格納していき、
+		//土曜日になったら1．のリストへ格納して新しいListを生成する（月末を求めるにはLocalDate#lengthOfMonth()を使う）
+
+		for (int j = 0; j < day.lengthOfMonth()/7; j++ ) {
+			for(int i = 0; i < 7; i++){
 				week.add(day);
 				day = day.plusDays(1);
 			}
-		//1週間分詰めたら1．のリストへ格納する
 			month.add(week);
 			week = new ArrayList<>();
-		
-		
-		//6. 2週目以降は単純に1日ずつ日を増やしながらLocalDateを求めてListへ格納していき、
-		//土曜日になったら1．のリストへ格納して新しいListを生成する（月末を求めるにはLocalDate#lengthOfMonth()を使う）
-		
-			for (int j = 0; j < day.lengthOfMonth()/7; j++ ) {
-				for(int i = 0; i < 7; i++){
-					week.add(day);
-					day = day.plusDays(1);
-				}
-				month.add(week);
-				week = new ArrayList<>();
-			
+
 		}
 
 		List<Tasks> list;
 		// ★日付とタスクを紐付けるコレクション
 		MultiValueMap<LocalDate, Tasks> tasks = new LinkedMultiValueMap<LocalDate, Tasks>();
-		
+
 		if (user.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
 			list = repo.findAllByDateBetween(start, day);
 		} else {
 			list = repo.findByDateBetween(start, day, user.getName());
 		}
 		for(Tasks task : list) {
-		    tasks.add(task.getDate(), task);
+			tasks.add(task.getDate(), task);
 		}
-		
+
 		model.addAttribute("matrix", month);
 		model.addAttribute("tasks", tasks);
-		
+
 		return "main";
 	}
 
@@ -127,18 +127,18 @@ public class MainController{
 	// タスク編集画面の表示用
 	@GetMapping("main/edit/{id}")
 	public String edit(Model model, @PathVariable Integer id) {
-	    Tasks task = repo.getById(id);
-	    model.addAttribute("task", task);
-	    return "edit";
+		Tasks task = repo.getById(id);
+		model.addAttribute("task", task);
+		return "edit";
 	}
-	
+
 	// タスク編集登録用
 	@PostMapping("/main/edit/{id}")
 	public String editTasks(@PathVariable Integer id,TaskForm taskForm, BindingResult bindingResult,
 			@AuthenticationPrincipal AccountUserDetails user) {
 		Tasks task = new Tasks();
-	    task.setId(id);
-	    task.setName(user.getName());
+		task.setId(id);
+		task.setName(user.getName());
 		task.setTitle(taskForm.getTitle());
 		task.setText(taskForm.getText());
 		task.setDate(taskForm.getDate());
@@ -146,14 +146,14 @@ public class MainController{
 		repo.save(task);
 		return "redirect:/main";
 	}
-	
+
 	// ★タスク削除用
-	  @PostMapping("/main/delete/{id}")
-	  public String deletePost(Model model, @PathVariable Integer id) {
-		  Tasks task = repo.getById(id);
-		  repo.delete(task);
-		  return "redirect:/main";
-	  }
+	@PostMapping("/main/delete/{id}")
+	public String deletePost(Model model, @PathVariable Integer id) {
+		Tasks task = repo.getById(id);
+		repo.delete(task);
+		return "redirect:/main";
+	}
 }
 
 
