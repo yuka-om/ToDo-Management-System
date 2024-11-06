@@ -52,13 +52,13 @@ public class MainController{
 
 		//3. その月の1日のLocalDateを取得する
 		day = LocalDate.of(day.getYear(), day.getMonthValue(), 1); // 現在日時からその月の1日を取得
-		int lastDay = day.lengthOfMonth();
+		int lastDay = day.lengthOfMonth(); // 当月の日数(int型)
 		//4.曜日を表すDayOfWeekを取得
 		DayOfWeek w = day.getDayOfWeek();
 		start = day;
 
 		//上で取得したLocalDateに曜日の値（DayOfWeek#getValue)をマイナスして前月分のLocalDateを求める
-		if (!(w.getValue() == 7)) {
+		if (!(w.getValue() == 7)) { // 前月分が必要な場合（初日が日曜日以外）
 			day = day.minusDays(w.getValue());
 			start = day;
 			//5. 1日ずつ増やしてLocalDateを求めていき、
@@ -72,10 +72,7 @@ public class MainController{
 			week = new ArrayList<>();
 		}
 
-		//6. 2週目以降は単純に1日ずつ日を増やしながらLocalDateを求めてListへ格納していき、
-		//土曜日になったら1．のリストへ格納して新しいListを生成する（月末を求めるにはLocalDate#lengthOfMonth()を使う）
-
-		int left = lastDay-(7 - w.getValue()); // 2週目の最初～月末までの日数 = left
+		int left = lastDay-(7 - w.getValue()); 
 		int lines = left / 7;
 		if (!(left %7 ==0)) { // leftが7の倍数でなかったら
 			lines++;
@@ -84,7 +81,6 @@ public class MainController{
 			for(int i = 0; i < 7; i++){
 				week.add(day);
 				day = day.plusDays(1);
-				System.out.println("#####" + day);
 			}
 			month.add(week);
 			week = new ArrayList<>();
